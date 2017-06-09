@@ -17,7 +17,11 @@ docker login https://52.56.228.3/
 docker build -t 52.56.228.3/admin/jenkins:latest .
 docker push 52.56.228.3/admin/jenkins:latest
 ```
-## TODO Create a Compose File to Run
+## Running the Jenkins Container
+
+```
+docker stack deploy -c docker-compose.yml jenkins
+```
 
 ## Jenkins Plug-Ins Required
 
