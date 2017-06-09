@@ -48,20 +48,24 @@ Create Docker Host Certificate Authentication	for Docker UCP
 ## Jenkins Configuration
 
 Docker Registry Config: 
-![Alt text](/images/Registry.jpg?raw=true "Jenkins - Registry Config")
+
+![Alt text](/images/Registry.png?raw=true "Jenkins - Registry Config")
 
 Creating Github Creds. Go to Github > Advanced > Additional Actions. And Convert Username / Password to token. This will insert a Personal Access token into Github. As mentioned above. 
-![Alt text](/images/GithubCreds.jpg?raw=true "Github Token Creation")
+
+![Alt text](/images/GithubCreds.png?raw=true "Github Token Creation")
 
 Configuring Github. Use your new token as the creds, and untick manage web hooks. And then test connection.
-![Alt text](/images/GithubConnection.jpg?raw=true "Github Connection")
+
+![Alt text](/images/GithubConnection.png?raw=true "Github Connection")
 
 UNSURE IF Required. Enter the Docker EE Reg Credentials on the Pipeline Model Definition.
 
 UNSURE IF REQIURED. Enter your credentials on the Git Plugin.
 
 Create a new Cloud using the Yet another Docker Plugin. And test connectoin :)
-![Alt text](/images/NewCloudConfig.jpg?raw=true "New Cloud Config")
+
+![Alt text](/images/NewCloudConfig.png?raw=true "New Cloud Config")
 
 On the Docker Template. Add your image name. 
 
