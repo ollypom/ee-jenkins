@@ -1,0 +1,16 @@
+version: "3.1"
+
+services:
+  jenkins:
+          image: 52.56.228.3/admin/jenkins
+          deploy:
+              mode: replicated
+              replicas: 1
+          ports:
+              - 30000:8080
+              - 50000:50000
+          volumes:
+              - jenkins:/var/jenkins_home
+volumes:
+        jenkins:
+
