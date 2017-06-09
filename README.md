@@ -1,6 +1,9 @@
 # Jenkins Container
 This is a repository to create a custom container with my UCP certificates
 
+\n INSTRUCTIONS TO CONFIGURE JENKINS ARE IN THE WIKI
+
+
 ## Prepare DTR
 Login into DTR and create yourself a repo to push the image into. After this login to the client
 
