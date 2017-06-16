@@ -50,7 +50,6 @@ Settings > Webooks > Add the payload URL: http://${DTR}:30000/github-webhook/
 
 In Jenkins go to Credentials > System > Global Credentials (unrestricted)
 
-Create Username / Password for Docker EE DTR
 Create Username / Password for Github
 Create Docker Host Certificate Authentication for Docker UCP
 
@@ -58,11 +57,9 @@ Create Docker Host Certificate Authentication for Docker UCP
 
 ## Jenkins Configuration
 
-Docker Registry Config: 
+Head to Manage Jenkins > System Configuration
 
-![Alt text](/images/Registry.png?raw=true "Jenkins - Registry Config")
-
-Creating Github Creds. Go to Github > Advanced > Additional Actions. And Convert Username / Password to token. This will insert a Personal Access token into Github. As mentioned above. 
+Scroll down to Github > Github Servers. Click on Advanced at the bottom, Additional Actions. And Convert Username / Password to token. This will insert a Personal Access token into Github. As mentioned above. 
 
 ![Alt text](/images/GithubCreds.png?raw=true "Github Token Creation")
 
@@ -70,23 +67,10 @@ Configuring Github. Use your new token as the creds, and untick manage web hooks
 
 ![Alt text](/images/GithubConnection.png?raw=true "Github Connection")
 
-UNSURE IF Required. Enter the Docker EE Reg Credentials on the Pipeline Model Definition.
-
 UNSURE IF REQIURED. Enter your credentials on the Git Plugin.
 
 Create a new Cloud using the Yet another Docker Plugin. And test connectoin :)
 
 ![Alt text](/images/NewCloudConfig.png?raw=true "New Cloud Config")
 
-On the Docker Template. Add your image name. 
-
-On the Docker Create Container settings, we need to give the container persmissions to use Docker in Docker (DIND).
-Under Volumes: /var/run/docker.sock:/var/run/docker.sock and tick the run as privileged container tick box.
-
-Hopefully you are then good to go :)
-
-
-
-
-
-
+### Everything is now good to go for your Jenkins Config. Your now ready to build your Pipeline Jobs :)
