@@ -1,10 +1,18 @@
 FROM jenkins:latest
 MAINTAINER ollypom
+
+# Add your UCP/DDR CA into an existing ca-cerificates file and copy this into the container.
 USER root
-COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 RUN chmod +r /etc/ssl/certs/ca-certificates.crt
-COPY ucp.crt $JAVA_HOME/jre/lib/security
+
+# Copy your UCP CA cert itself into the container and so Jenkins itself can talk to your Docker EE Components
+USER root
+COPY certs/ucp.crt $JAVA_HOME/jre/lib/security
 RUN \
     cd $JAVA_HOME/jre/lib/security \
     && keytool -keystore cacerts -storepass changeit -noprompt -trustcacerts -importcert -alias ucpcert -file ucp.crt
+
+# Switch back to Jenkins User before running the container
 USER jenkins
+
