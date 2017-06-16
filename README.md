@@ -1,7 +1,7 @@
 # Jenkins Container
 This is a repository to create a Jenkins container, with embedded UCP certs, and steps on how to configure Jenkins to work with Github and your UCP Cluster. To build Slave Containers to carry out Jenkins jobs see:
 
-- https://github.com/ollypom/ee-jenkins-slaves
+- https://github.com/ollypom/ee-jenkins-slave
 
 ## Prepare DTR
 Login into DTR and create yourself a repo to push the image into. After this login to the client
