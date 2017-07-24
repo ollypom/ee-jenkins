@@ -40,8 +40,6 @@ Add your Jenkins Server SSH key into Github
 
 ![Alt text](/images/githubsshkey.png?raw=true "Jenkins SSH Key")
 
-A personal Access Token will be inserted thanks to the Github Authentication Plugin to allow access to private repos. More on that later.
-
 On the application github repository add a webhook to notify jenkins everytime there is a build:
 
 Settings > Webooks > Add the payload URL: http://${DTR}:30000/github-webhook/
@@ -52,24 +50,15 @@ Settings > Webooks > Add the payload URL: http://${DTR}:30000/github-webhook/
 
 In Jenkins go to Credentials > System > Global Credentials (unrestricted)
 
-Create Username / Password for Github
 Create Docker Host Certificate Authentication for Docker UCP
 
 ![Alt text](/images/jenkinscreds.png?raw=true "Jenkins Credentials")
 
-## Jenkins Configuration
+Create a personal access token on Github. Within Jenkins go to Global Credentials and a secret text entry. Insert your Personall Access token here.
 
 Head to Manage Jenkins > System Configuration
 
-Scroll down to Github > Github Servers. Click on Advanced at the bottom, Additional Actions. And Convert Username / Password to token. This will insert a Personal Access token into Github. As mentioned above. 
-
-![Alt text](/images/GithubCreds.png?raw=true "Github Token Creation")
-
-Configuring Github. Use your new token as the creds, and untick manage web hooks. And then test connection.
-
-![Alt text](/images/GithubConnection.png?raw=true "Github Connection")
-
-UNSURE IF REQIURED. Enter your credentials on the Git Plugin.
+Scroll down to Github > Github Servers. Specify your secret text credentials from the list and test the conntection to github.
 
 Create a new Cloud using the Yet another Docker Plugin. And test connectoin :)
 
