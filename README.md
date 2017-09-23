@@ -26,7 +26,6 @@ docker stack deploy -c docker-compose.yml jenkins
 
 ## Jenkins Plug-Ins Required
 
-- Docker Plugin
 - Yet another Docker Plugin - Credentials Work now!
 - Git Plugin
 - Github API plugin
