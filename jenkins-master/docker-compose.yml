@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   jenkins:
-      image: 52.56.228.3/admin/jenkins:2.79-alpine
+      image: 52.56.228.3/admin/jenkins:2.82-alpine
       deploy:
           mode: replicated
           replicas: 1

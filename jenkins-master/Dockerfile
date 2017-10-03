@@ -1,6 +1,6 @@
 # jenkinsci/jenkins is official repo
 # jenkins:lts is debian based 800mb, jenkins:lts-alpine is 200mb.
-FROM jenkinsci/jenkins:2.79-alpine
+FROM jenkinsci/jenkins:2.82-alpine
 MAINTAINER ollypom
 
 # Add your UCP/DDR CA into an existing ca-cerificates file and copy this into the container.
