@@ -44,4 +44,4 @@ EXPOSE 22
 
 # Insert a Startup Script and Run it
 ADD jenkins-slave-startup.sh /
-CMD ["/jenkins-slave-startup.sh"]
+CMD ["./jenkins-slave-startup.sh"]
