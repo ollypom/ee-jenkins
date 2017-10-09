@@ -1,0 +1,23 @@
+version: '3.2'
+services:
+    webapp:
+        image: 52.56.228.3/admin/demo-app:latest
+        networks: 
+            - backend
+            - ucp-hrm
+        ports:
+            - 80
+        deploy:
+            mode: replicated
+            replicas: 1
+            placement:
+                constraints: [node.role == worker]
+            labels:
+                com.docker.ucp.mesh.http: "external_route=http://app.olly.dtcntr.net,internal_port=80"
+
+networks:
+    backend:
+        driver: overlay
+    ucp-hrm:
+        external: true
+

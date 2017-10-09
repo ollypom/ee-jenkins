@@ -1,0 +1,31 @@
+def demo-app-url = '52.56.228.3/admin/demo-app' 
+def siege-url = '52.56.228.3/admin/demo-app'
+def git_creds = '03c5601d-699a-4870-96d3-94a2251cee15'
+
+node("docker") {
+   git url: "${git_url}", credentialsId: "${git_creds}"
+     
+   sh "git rev-parse HEAD > .git/commit-id"
+   def commit_id = readFile('.git/commit-id').trim()
+   println commit_id
+
+   stage "qa"
+   sh "cd /home/jenkins && \
+   source env.sh && \
+   docker service create -b 30003:80 --image ${demo-app-url}:${commit_id} demo"
+
+   sh "cd /home/jenkins && \
+   source env.sh && \
+   docker service create -b 30003:80 --image ${siege-app-url}:latest siege"
+
+   sleep 50        
+
+   stage "cleanup"
+   sh "cd /home/jenkins && \
+   source env.sh && \
+   docker service rm demo"
+   
+   sh "cd /home/jenkins && \
+   source env.sh && \
+   docker service rm siege"
+}

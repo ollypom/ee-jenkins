@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Olly's Demo!</title>
+<style>
+    button {
+	background: none;
+        border:0px;
+    }
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1 align="center">Hello, Welcome to Olly's Demo!</h1>
+<br>
+    <script type="text/javascript">
+    var clicks = 0;
+    function onClick() {
+        clicks += 1;
+        document.getElementById("clicks").innerHTML = clicks;
+    };
+    </script>
+    <center><button type="button" onClick="onClick()"><img src="logo.png" alt="Docker Logo" style="width:325px;height:270px;"></button></center>
+    <br>
+    <center><p>Clicks: <a id="clicks">0</a></p></center>
+</body>
+</html>
