@@ -2,7 +2,7 @@ def dtr_creds = '1bbb0ffa-7ef6-4cba-9bc5-b69f94092ab8'
 def dtr_url = '52.56.228.3'
 def dtr_repo = 'admin/demo-app'
 
-def git_url = 'git@github.com:ollypom/ee-demo-app.git'
+def git_url = 'git@github.com:ollypom/ee-jenkins.git'
 def git_creds = '03c5601d-699a-4870-96d3-94a2251cee15'
 
 def signing_key = 'notary_passphrase'
@@ -19,7 +19,8 @@ node("docker") {
         println commit_id
          
         stage "build"
-        sh "docker -D build -t ${dtr_url}/${dtr_repo}:${commit_id} ."
+        sh "cd jenkins-demo-app && \
+        docker -D build -t ${dtr_url}/${dtr_repo}:${commit_id} ."
         
         stage "publish"
         sh "export NOTARY_DELEGATION_PASSPHRASE=${SIGNING_KEY} && \

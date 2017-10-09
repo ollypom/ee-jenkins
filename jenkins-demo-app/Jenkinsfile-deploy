@@ -1,6 +1,7 @@
 def demo-app-url = '52.56.228.3/admin/demo-app' 
 def siege-url = '52.56.228.3/admin/demo-app'
-def git_url = 'git@github.com:ollypom/ee-demo-app.git'
+
+def git_url = 'git@github.com:ollypom/ee-jenkins.git'
 def git_creds = '03c5601d-699a-4870-96d3-94a2251cee15'
 
 node("docker") {
