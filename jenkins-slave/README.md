@@ -1,4 +1,4 @@
-# Jenkins Slave for Docker EE
+# TODO NEED TO UPDATE FOR DOCKER EE
 
 This repository will give you the Container images for 2 build jobs in Jenkins. 1 to Build Images and 1 to deploy services. These jobs will build images from a github repo, and can the update a deployed service on a UCP cluster.
 

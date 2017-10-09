@@ -1,4 +1,7 @@
-# Jenkins Container
+# Docker EE (Datacentre) Example Jenkins CICD Setup
+
+TODO UPDATE README 
+
 This is a repository to create a Jenkins container, with embedded UCP certs, and steps on how to configure Jenkins to work with Github and your UCP Cluster. To build Slave Containers to carry out Jenkins jobs see:
 
 - https://github.com/ollypom/ee-jenkins-slave
