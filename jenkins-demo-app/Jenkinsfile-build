@@ -3,8 +3,6 @@ def dtr_url = '52.56.228.3'
 def dtr_repo = 'admin/demo-app'
 
 def git_url = 'git@github.com:ollypom/ee-jenkins.git'
-def git_creds = '03c5601d-699a-4870-96d3-94a2251cee15'
-
 def signing_key = 'notary_passphrase'
 
 node("docker") {
@@ -12,7 +10,7 @@ node("docker") {
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD'],
         [$class: 'StringBinding', credentialsId: signing_key, variable: 'SIGNING_KEY'],
     ]){
-        git url: "${git_url}", credentialsId: "${git_creds}"
+        git url: "${git_url}"
           
         sh "git rev-parse HEAD > .git/commit-id"
         def commit_id = readFile('.git/commit-id').trim()

@@ -44,4 +44,4 @@ EXPOSE 22
 
 # Insert a Startup Script and Run it
 ADD jenkins-slave-startup.sh /
-CMD ["./jenkins-slave-startup.sh"]
+CMD ["chmod +x /home/jenkins-slave-startup.sh && bash /jenkins-slave-startup.sh"]
