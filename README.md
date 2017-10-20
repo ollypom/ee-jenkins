@@ -98,6 +98,8 @@ Your now ready to build your Pipeline Jobs :)
 
 ### Pipeline instructions
 
+## Configure Docker Template
+
 Manage Jenkins > Configure System > Cloud > YAD > Add Docker Template
 
 Docker Image Name: dtr.olly.dtcntr.net/admin/slave:latest
@@ -108,5 +110,10 @@ Create Container Settings >
 
 Save
 
+## Configure Credentials
 
+System > Configure Credentials > System
+
+- Create one with DTR User and Password
+- Create one with Secret Text String for Notary Passphrase
 
