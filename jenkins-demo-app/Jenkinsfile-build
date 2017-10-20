@@ -1,5 +1,5 @@
-def dtr_creds = '1bbb0ffa-7ef6-4cba-9bc5-b69f94092ab8'
-def dtr_url = '52.56.228.3'
+def dtr_creds = 'ae438414-d411-4d68-8193-001b6f61c5cb'
+def dtr_url = 'dtr.olly.dtcntr.net'
 def dtr_repo = 'admin/demo-app'
 
 def git_url = 'git@github.com:ollypom/ee-jenkins.git'
