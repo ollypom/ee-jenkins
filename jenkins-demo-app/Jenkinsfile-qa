@@ -1,33 +1,35 @@
-def demo-app-url = '52.56.228.3/admin/demo-app' 
-def siege-url = '52.56.228.3/admin/demo-app'
+def dtr_creds = 'dtrcreds'
+def dtr_url = 'dtr.olly.dtcntr.net'
+def dtr_repo = 'fakeco-prod/demo-app'
 
-def git_url = 'git@github.com:ollypom/ee-jenkins.git'
-def git_creds = '03c5601d-699a-4870-96d3-94a2251cee15'
+def signing_key = 'notary_passphrase'
+def git_url = 'https://github.com/ollypom/ee-jenkins.git'
 
 node("docker") {
-   git url: "${git_url}", credentialsId: "${git_creds}"
-     
-   sh "git rev-parse HEAD > .git/commit-id"
-   def commit_id = readFile('.git/commit-id').trim()
-   println commit_id
+    withCredentials([
+        [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD'],
+        [$class: 'StringBinding', credentialsId: signing_key, variable: 'SIGNING_KEY'],
+    ]){
+        git url: "${git_url}", credentialsId: "${git_creds}"
+          
+        sh "git rev-parse HEAD > .git/commit-id"
+        def commit_id = readFile('.git/commit-id').trim()
+        println commit_id
 
-   stage "qa"
-   sh "cd /home/jenkins && \
-   source env.sh && \
-   docker service create -b 30003:80 --image ${demo-app-url}:${commit_id} demo"
+        stage "Tagging"
+        sh " \
+        docker login -u ${DTR_USR} -p ${DTR_PWD} && \
+        docker pull docker pull ${dtr_url}/fakeco-ops/demo-app:latest && 
+        docker tag ${dtr_url}/fakeco-ops/demo-app:latest ${dtr_url}/${dtr_repo}:${BUILD_NUMBER}"
 
-   sh "cd /home/jenkins && \
-   source env.sh && \
-   docker service create -b 30003:80 --image ${siege-app-url}:latest siege"
-
-   sleep 50        
-
-   stage "cleanup"
-   sh "cd /home/jenkins && \
-   source env.sh && \
-   docker service rm demo"
-   
-   sh "cd /home/jenkins && \
-   source env.sh && \
-   docker service rm siege"
+        stage "publish"
+        sh "export NOTARY_DELEGATION_PASSPHRASE=${SIGNING_KEY} && \
+        notary -d ~/.docker/trust key import /home/jenkins/key.pem --role=targets/releases && \
+        notary -d ~/.docker/trust key list"
+        
+        sh "export DOCKER_CONTENT_TRUST=1 \
+        DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=${SIGNING_KEY} && \
+        docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
+        docker push ${dtr_url}/${dtr_repo}:${BUILD_NUMBER}
+    }
 }
