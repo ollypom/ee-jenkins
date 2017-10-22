@@ -30,6 +30,6 @@ node("docker") {
         sh "export DOCKER_CONTENT_TRUST=1 \
         DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=${SIGNING_KEY} && \
         docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
-        docker push ${dtr_url}/${dtr_repo}:${BUILD_NUMBER}
+        docker push ${dtr_url}/${dtr_repo}:${BUILD_NUMBER}"
     }
 }
