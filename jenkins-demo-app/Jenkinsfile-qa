@@ -10,7 +10,7 @@ node("docker") {
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD'],
         [$class: 'StringBinding', credentialsId: signing_key, variable: 'SIGNING_KEY'],
     ]){
-        git url: "${git_url}", credentialsId: "${git_creds}"
+        git url: "${git_url}"
           
         sh "git rev-parse HEAD > .git/commit-id"
         def commit_id = readFile('.git/commit-id').trim()
