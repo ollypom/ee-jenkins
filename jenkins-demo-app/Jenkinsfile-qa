@@ -10,6 +10,7 @@ node("docker") {
     withCredentials([
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD'],
         [$class: 'StringBinding', credentialsId: signing_key, variable: 'SIGNING_KEY'],
+        [$class: 'StringBinding', credentialsId: delegation_key, variable: 'DELEGATION_KEY'],
     ]){
         git url: "${git_url}"
           
@@ -25,13 +26,13 @@ node("docker") {
 
         stage "publish"
         sh " \
-        export NOTARY_DELEGATION_PASSPHRASE=${SIGNING_KEY} && \
+        export NOTARY_DELEGATION_PASSPHRASE=${DELEGATIONG_KEY} && \
         notary -d ~/.docker/trust key import /home/jenkins/key.pem --role=targets/releases && \
         notary -d ~/.docker/trust key list"
         
         sh " \
         export DOCKER_CONTENT_TRUST=1 \
-        DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=${DELEGATION_KEY} && \
+        DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=${SIGNING_KEY} && \
         docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
         docker push ${dtr_url}/${dtr_repo}:${BUILD_NUMBER}"
     }
