@@ -18,7 +18,7 @@ node("docker") {
 
         stage "Tagging"
         sh " \
-        docker login -u ${DTR_USR} -p ${DTR_PWD} && \
+        docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
         docker pull ${dtr_url}/fakeco-ops/demo-app:latest && \
         docker tag ${dtr_url}/fakeco-ops/demo-app:latest ${dtr_url}/${dtr_repo}:${BUILD_NUMBER}"
 
