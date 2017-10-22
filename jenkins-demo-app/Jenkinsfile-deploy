@@ -2,5 +2,5 @@ node("docker") {
     stage "deploy"
     sh "cd /home/jenkins && \
     source env.sh && \
-    docker service update --image dtr.olly.dtcntr.net/fakeco-prod/demo-app:latest demo"
+    docker service update --image dtr.olly.dtcntr.net/fakeco-prod/demo-app:latest demo_webapp"
 }
