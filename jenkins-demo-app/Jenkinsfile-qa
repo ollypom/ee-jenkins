@@ -2,7 +2,8 @@ def dtr_creds = 'dtrcreds'
 def dtr_url = 'dtr.olly.dtcntr.net'
 def dtr_repo = 'fakeco-prod/demo-app'
 
-def signing_key = 'notary_passphrase'
+def delegation_key = 'notary_passphrase'
+def signing_key = 'signing_passphrase'
 def git_url = 'https://github.com/ollypom/ee-jenkins.git'
 
 node("docker") {
@@ -30,7 +31,7 @@ node("docker") {
         
         sh " \
         export DOCKER_CONTENT_TRUST=1 \
-        DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=${SIGNING_KEY} && \
+        DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=${DELEGATION_KEY} && \
         docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
         docker push ${dtr_url}/${dtr_repo}:${BUILD_NUMBER}"
     }
