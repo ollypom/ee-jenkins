@@ -32,5 +32,10 @@ node("docker") {
         DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=${SIGNING_KEY} && \
         docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
         docker push ${dtr_url}/${prod_repo}:${BUILD_NUMBER}"
+
+        stage "deploy"
+        sh "cd /home/jenkins && \
+        source env.sh && \
+        docker service update --image ${dtr_url}/${prod_repo}:${BUILD_NUMBER} demo_webapp"
     }
 }
