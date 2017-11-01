@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   jenkins:
-      image: dtr.olly.dtcntr.net/admin/jenkins:2.85-alpine
+      image: dtr.olly.dtcntr.net/admin/jenkins:2.87-alpine
       deploy:
           mode: replicated
           replicas: 1
