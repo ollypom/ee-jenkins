@@ -2,7 +2,6 @@ def dtr_creds = 'dtrcreds'
 def dtr_url = 'dtr.olly.dtcntr.net'
 def dtr_repo = 'fakeco-prod/demo-app'
 
-def delegation_key = 'notary_passphrase'
 def signing_key = 'signing_passphrase'
 def git_url = 'https://github.com/ollypom/ee-jenkins.git'
 
@@ -10,7 +9,6 @@ node("docker") {
     withCredentials([
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD'],
         [$class: 'StringBinding', credentialsId: signing_key, variable: 'SIGNING_KEY'],
-        [$class: 'StringBinding', credentialsId: delegation_key, variable: 'DELEGATION_KEY'],
     ]){
         git url: "${git_url}"
           
@@ -25,19 +23,13 @@ node("docker") {
         docker tag ${dtr_url}/fakeco-ops/demo-app:latest ${dtr_url}/${dtr_repo}:${BUILD_NUMBER}"
 
         stage "publish"
-        sh " \
+        sh "export NOTARY_DELEGATION_PASSPHRASE=${SIGNING_KEY} && \
+        notary -d ~/.docker/trust key import /home/jenkins/key.pem --role=targets/releases && \
+        notary -d ~/.docker/trust key list"
+        
+        sh "export DOCKER_CONTENT_TRUST=1 \
+        DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=${SIGNING_KEY} && \
         docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
         docker push ${dtr_url}/${dtr_repo}:${BUILD_NUMBER}"
-
-        stage "Latest Tagging"
-        sh " \
-        docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
-        docker pull ${dtr_url}/fakeco-ops/demo-app:latest && \
-        docker tag ${dtr_url}/fakeco-ops/demo-app:latest ${dtr_url}/${dtr_repo}:latest"
-
-        stage "Latest Publish"
-        sh " \
-        docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
-        docker push ${dtr_url}/${dtr_repo}:latest"
     }
 }
