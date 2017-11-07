@@ -23,7 +23,7 @@ RUN (unzip /home/jenkins/ucp-bundle-jenkins.zip -d /home/jenkins/ && \
     update-ca-certificates)
 
 # Install the Docker Client
-RUN (wget -O /tmp/docker-static.tgz "https://download.docker.com/linux/static/stable/x86_64/docker-17.09.0-ce.tgz" &&\
+RUN (wget -O /tmp/docker-static.tgz "https://download.docker.com/linux/static/edge/x86_64/docker-17.10.0-ce.tgz" &&\
   cd /tmp &&\
   tar -vxzf docker-static.tgz &&\
   mv /tmp/docker/docker /usr/local/bin/docker &&\
@@ -36,6 +36,7 @@ RUN (wget -O /usr/local/bin/notary "https://github.com/docker/notary/releases/do
 
 # Add user jenkins to the image
 RUN (adduser -D -h /home/jenkins -s /bin/sh jenkins && \
+    addgroup jenkins ping && \
     echo "jenkins:jenkins" | chpasswd && \
     chown -R jenkins:jenkins /home/jenkins/*)
 
@@ -44,4 +45,4 @@ EXPOSE 22
 
 # Insert a Startup Script and Run it
 ADD jenkins-slave-startup.sh /
-CMD ["chmod +x /home/jenkins-slave-startup.sh && bash /jenkins-slave-startup.sh"]
+CMD ["chmod +x /jenkins-slave-startup.sh && bash /jenkins-slave-startup.sh"]
