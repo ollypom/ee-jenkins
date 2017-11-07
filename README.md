@@ -8,7 +8,7 @@ Firstly we will build the required images for the Jenkins Environment. The pre-r
 
 ```
 $ export DTR=https://
-$ export VERSION=2.85
+$ export VERSION=2.88
 
 $ cd jenkins-master
 $ docker build -t ${DTR}/admin/jenkins:${VERSION} .
