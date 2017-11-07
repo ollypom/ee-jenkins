@@ -105,6 +105,7 @@ Manage Jenkins > Configure System > Cloud > YAD > Add Docker Template
 Docker Image Name: dtr.olly.dtcntr.net/admin/slave:latest
 
 Create Container Settings >
+ - Command bin/bash chown jenkins:jenkins /var/run/docker.sock
  - Volumes /var/run/docker.sock:/var/run/docker.sock
  - Run Container Privileged
 
