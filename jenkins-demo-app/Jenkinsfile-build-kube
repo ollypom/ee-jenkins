@@ -9,7 +9,8 @@ podTemplate(label: 'jenkins-slave') {
     withCredentials([
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD'],
         [$class: 'StringBinding', credentialsId: signing_key, variable: 'SIGNING_KEY'],
-    ])node('mypod') {
+    ])
+    node('mypod') {
         git url: "${git_url}"
           
         sh "git rev-parse HEAD > .git/commit-id"
