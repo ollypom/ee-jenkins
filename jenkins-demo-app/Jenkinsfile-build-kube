@@ -1,0 +1,33 @@
+def dtr_creds = 'dtrusername'
+def dtr_url = 'dtr.olly.dtcntr.net'
+def dtr_repo = 'admin/demo-app'
+
+def git_url = 'https://github.com/ollypom/ee-jenkins.git'
+def signing_key = 'notary_passphrase'
+
+podTemplate(label: 'jenkins-slave') {
+    withCredentials([
+        [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD'],
+        [$class: 'StringBinding', credentialsId: signing_key, variable: 'SIGNING_KEY'],
+    ]){
+        git url: "${git_url}"
+          
+        sh "git rev-parse HEAD > .git/commit-id"
+        def commit_id = readFile('.git/commit-id').trim()
+        println commit_id
+         
+        stage "build"
+        sh "cd jenkins-demo-app && \
+        docker -D build -t ${dtr_url}/${dtr_repo}:${commit_id} ."
+        
+        stage "publish"
+        sh "export NOTARY_DELEGATION_PASSPHRASE=${SIGNING_KEY} && \
+        notary -d ~/.docker/trust key import /home/jenkins/key.pem --role=targets/releases && \
+        notary -d ~/.docker/trust key list"
+        
+        sh "export DOCKER_CONTENT_TRUST=1 \
+        DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE=${SIGNING_KEY} && \
+        docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
+        docker push ${dtr_url}/${dtr_repo}:${commit_id}"
+    }
+}
