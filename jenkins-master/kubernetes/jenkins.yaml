@@ -1,0 +1,103 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-service-account
+  namespace: jenkins
+---
+# Jenkins Deployment
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+ name: jenkins
+ namespace: jenkins
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+    app: master
+ template:
+  metadata:
+   labels:
+    app: master
+  spec:
+   serviceAccountName: jenkins-service-account
+   nodeSelector:
+       opnoderole: ci
+   containers:
+   - name: master
+     image: 'jenkinsci/jenkins:2.102-alpine'
+     ports:
+     - containerPort: 8080
+     - containerPort: 50000
+     readinessProbe:
+      httpGet:
+       path: /login
+       port: 8080
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 2
+      failureThreshold: 5
+     volumeMounts:
+     - mountPath: /var/jenkins_home
+       name: jenkins-home
+     resources:
+      limits:
+       cpu: 500m
+       memory: 1500Mi
+      requests:
+       cpu: 500m
+       memory: 1500Mi
+   volumes:
+   - name: jenkins-home
+     persistentVolumeClaim:
+      claimName: jenkins
+---
+## Services
+#kind: Service
+#apiVersion: v1
+#metadata:
+#    name: jenkins-master
+#    namespace: jenkins
+#spec:
+#    selector:
+#        app: master
+#    ports:
+#        - port: 8080
+#          protocol: TCP
+#          targetPort: 8080
+#          name: ui
+---
+# Services
+kind: Service
+apiVersion: v1
+metadata:
+    name: jenkins-master
+    namespace: jenkins
+spec:
+    selector:
+        app: master
+    ports:
+        - port: 50000
+          protocol: TCP
+          targetPort: 50000
+          name: slaves
+        - port: 80
+          protocol: TCP
+          targetPort: 8080
+          name: ui
+---
+# Create the ingress resource
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jenkins-ui
+  namespace: jenkins
+spec:
+  rules:
+  - host: jenkins.apps.olly.dtcntr.net
+    http:
+      paths:
+      - backend:
+          serviceName: jenkins-master
+          servicePort: 80
