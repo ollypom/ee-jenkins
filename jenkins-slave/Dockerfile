@@ -1,8 +1,13 @@
-FROM alpine:3.6
+
+FROM alpine:3.7
 MAINTAINER olly@docker.com
+
+ARG UCPURL="https://ucp.olly.dtcntr.net:8443"
+ARG NTYURL="https://github.com/docker/notary/releases/download/v0.6.0/notary-Linux-amd64"
 
 RUN apk add --upgrade --no-cache \
     ca-certificates \
+    curl \
     openssh \
     openssh-server \
     git \
@@ -16,29 +21,24 @@ ENV JAVA_HOME /usr/lib/jvm/default-jvm
 RUN apk add --no-cache openjdk8 && \
     ln -sf "${JAVA_HOME}/bin/"* "/usr/bin/"
 
-# Copy Accross UCP Certs
-COPY ucp-bundle-jenkins.zip /home/jenkins/
-RUN (unzip /home/jenkins/ucp-bundle-jenkins.zip -d /home/jenkins/ && \
-    cp /home/jenkins/ca.pem /usr/local/share/ca-certificates/ca.pem && \
+# Embed UCP CA Certificate
+RUN (curl -sk ${UCPURL}/ca > /usr/local/share/ca-certificates/ca.pem && \
     update-ca-certificates)
 
 # Install the Docker Client
-RUN (wget -O /tmp/docker-static.tgz "https://download.docker.com/linux/static/edge/x86_64/docker-17.10.0-ce.tgz" &&\
-  cd /tmp &&\
-  tar -vxzf docker-static.tgz &&\
-  mv /tmp/docker/docker /usr/local/bin/docker &&\
-  chmod +x /usr/local/bin/docker &&\
-  rm -rf /tmp/docker /tmp/docker-static.tgz)
+RUN (wget --no-check-certificate ${UCPURL}/linux/docker &&\
+  mv docker /usr/local/bin/docker &&\
+  chmod +x /usr/local/bin/docker)
 
-# install notary
-RUN (wget -O /usr/local/bin/notary "https://github.com/docker/notary/releases/download/v0.4.3/notary-Linux-amd64" &&\
+# Install notary
+RUN (wget -O /usr/local/bin/notary ${NTYURL} &&\
   chmod +x /usr/local/bin/notary)
 
 # Add user jenkins to the image
 RUN (adduser -D -h /home/jenkins -s /bin/sh jenkins && \
     addgroup jenkins ping && \
     echo "jenkins:jenkins" | chpasswd && \
-    chown -R jenkins:jenkins /home/jenkins/*)
+    chown -R jenkins:jenkins /home/jenkins)
 
 # Expose SSH
 EXPOSE 22
