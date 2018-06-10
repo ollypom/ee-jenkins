@@ -9,24 +9,22 @@ metadata:
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
- name: jenkins
+ name: jenkins-master
  namespace: jenkins
 spec:
  replicas: 1
  selector:
   matchLabels:
-    app: master
+    app: jenkins-master
  template:
   metadata:
    labels:
-    app: master
+    app: jenkins-master
   spec:
    serviceAccountName: jenkins-service-account
-   nodeSelector:
-       opnoderole: ci
    containers:
    - name: master
-     image: 'jenkinsci/jenkins:2.102-alpine'
+     image: 'jenkinsci/jenkins:lts-alpine'
      ports:
      - containerPort: 8080
      - containerPort: 50000
@@ -53,21 +51,6 @@ spec:
      persistentVolumeClaim:
       claimName: jenkins
 ---
-## Services
-#kind: Service
-#apiVersion: v1
-#metadata:
-#    name: jenkins-master
-#    namespace: jenkins
-#spec:
-#    selector:
-#        app: master
-#    ports:
-#        - port: 8080
-#          protocol: TCP
-#          targetPort: 8080
-#          name: ui
----
 # Services
 kind: Service
 apiVersion: v1
@@ -76,7 +59,7 @@ metadata:
     namespace: jenkins
 spec:
     selector:
-        app: master
+        app: jenkins-master
     ports:
         - port: 50000
           protocol: TCP

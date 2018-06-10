@@ -1,8 +1,6 @@
-New Instructions for Kube
+# Instructions for Kube
 
-Create Service Account for Docker EE
-
-Make sure the Pod has the service account mounted in its manifest.
+Once a service account has been created for Jenkins, this SA needs "Full Control" of the Jenkins namespace. Full control is required to mount the docker sock.
 
 Install Plugins:
 

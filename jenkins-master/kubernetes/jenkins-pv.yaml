@@ -15,7 +15,7 @@ spec:
     - nfsvers=4.1
   nfs:
     path: /jenkins
-    server: 172.31.16.33
+    server: 172.31.31.115
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
