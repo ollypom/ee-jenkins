@@ -21,7 +21,8 @@ podTemplate(label: 'docker',
           println commit_id
 
           sh "docker -D build -t ${dtr_url}/${dtr_repo}:${commit_id} ."
-
+        }
+      }
       stage('Push Docker image') {
         container('docker') {
           sh "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
