@@ -14,7 +14,7 @@ podTemplate(label: 'docker',
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
     ]){
       stage('Build Docker image') {
-        git 'https://github.com/ollypom/ee-demo-app.git'
+        git ${git_url}
         container('docker') {
           sh "git rev-parse HEAD > .git/commit-id"
           def commit_id = readFile('.git/commit-id').trim()
@@ -24,7 +24,12 @@ podTemplate(label: 'docker',
         }
       }
       stage('Push Docker image') {
+        git ${git_url}
         container('docker') {
+          sh "git rev-parse HEAD > .git/commit-id"
+          def commit_id = readFile('.git/commit-id').trim()
+          println commit_id
+
           sh "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
           docker push ${dtr_url}/${dtr_repo}:${commit_id}"
         }
