@@ -1,6 +1,6 @@
 def dtr_creds = '341ab591-1432-44e7-a28c-44bf7fb3871e'
 def dtr_url = 'dtr.olly.dtcntr.net'
-def dtr_repo = 'admin/demo-app'
+def dtr_repo = 'dave/demo-app'
 
 def git_url = 'https://github.com/ollypom/ee-jenkins.git'
 
@@ -15,7 +15,7 @@ podTemplate(label: 'docker',
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
     ]){
       stage('Build Docker image') {
-        git 'https://github.com/ollypom/ee-jenkins.git'
+        git 'https://github.com/ollypom/ee-demo-app.git'
         container('docker') {
           sh "git rev-parse HEAD > .git/commit-id"
           def commit_id = readFile('.git/commit-id').trim()
