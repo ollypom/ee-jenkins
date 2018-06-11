@@ -2,7 +2,7 @@ def dtr_creds = '341ab591-1432-44e7-a28c-44bf7fb3871e'
 def dtr_url = 'dtr.olly.dtcntr.net'
 def dtr_repo = 'dave/demo-app'
 
-def git_url = 'https://github.com/ollypom/ee-jenkins.git'
+def git_url = 'https://github.com/ollypom/ee-demo-app.git'
 
 podTemplate(label: 'docker',
   containers: [containerTemplate(name: 'docker', image: 'dtr.olly.dtcntr.net/admin/jenkins-slave:0.1', ttyEnabled: true, command: 'cat')],
@@ -14,7 +14,7 @@ podTemplate(label: 'docker',
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
     ]){
       stage('Build Docker image') {
-        git ${git_url}
+        git "${git_url}"
         container('docker') {
           sh "git rev-parse HEAD > .git/commit-id"
           def commit_id = readFile('.git/commit-id').trim()
@@ -24,7 +24,7 @@ podTemplate(label: 'docker',
         }
       }
       stage('Push Docker image') {
-        git ${git_url}
+        git "${git_url}"
         container('docker') {
           sh "git rev-parse HEAD > .git/commit-id"
           def commit_id = readFile('.git/commit-id').trim()
