@@ -2,6 +2,8 @@
 
 This is a repository to configure a fully functioning Jenkins CICD environment running on top of Docker Enterprise Edition (Docker EE). This is using the Docker Swarm Orchestrator within Docker EE.
 
+For demonstrations, this repo is linked with https://github.com/ollypom/ee-demo-app
+
 ## Build your images and push them to DTR (Distributed Trusted Registry)
 
 Firstly we will build the required images for the Jenkins Environment. The pre-requisites for this include downloading your UCP Client Bundle and placing it within the the Jenkins-Master and Jenkins-Slave repository. We will use the certificates within this bundle later.
