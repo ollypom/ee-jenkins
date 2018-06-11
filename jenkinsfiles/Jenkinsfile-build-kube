@@ -15,7 +15,7 @@ podTemplate(label: 'docker',
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
     ]){
       stage('Build Docker image') {
-        git 'git@github.com:ollypom/ee-demo-app.git'
+        git 'https://github.com/ollypom/ee-demo-app.git'
         container('docker') {
           sh "git rev-parse HEAD > .git/commit-id"
           def commit_id = readFile('.git/commit-id').trim()
