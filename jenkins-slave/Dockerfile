@@ -3,7 +3,7 @@ FROM alpine:3.7
 MAINTAINER olly@docker.com
 
 ARG UCPURL="https://ucp.olly.dtcntr.net:8443"
-ARG NTYURL="https://github.com/docker/notary/releases/download/v0.6.0/notary-Linux-amd64"
+ARG NTYURL="https://github.com/theupdateframework/notary/releases/download/v0.4.3/notary-Linux-amd64"
 
 RUN apk add --upgrade --no-cache \
     ca-certificates \
@@ -22,16 +22,16 @@ RUN apk add --no-cache openjdk8 && \
     ln -sf "${JAVA_HOME}/bin/"* "/usr/bin/"
 
 # Embed UCP CA Certificate
-RUN (curl -sk ${UCPURL}/ca > /usr/local/share/ca-certificates/ca.pem && \
+RUN (curl -sk ${UCPURL}/ca > /usr/local/share/ca-certificates/ca.crt && \
     update-ca-certificates)
 
 # Install the Docker Client
-RUN (wget --no-check-certificate ${UCPURL}/linux/docker &&\
+RUN (wget -q --no-check-certificate ${UCPURL}/linux/docker &&\
   mv docker /usr/local/bin/docker &&\
   chmod +x /usr/local/bin/docker)
 
 # Install notary
-RUN (wget -O /usr/local/bin/notary ${NTYURL} &&\
+RUN (wget -q -O /usr/local/bin/notary ${NTYURL} &&\
   chmod +x /usr/local/bin/notary)
 
 # Add user jenkins to the image

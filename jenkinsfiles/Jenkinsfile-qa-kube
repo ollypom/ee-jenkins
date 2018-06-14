@@ -5,9 +5,49 @@ def ga_repo = 'prod/demo-app'
 
 def git_url = 'https://github.com/ollypom/ee-demo-app.git'
 
-podTemplate(label: 'docker',
-  containers: [containerTemplate(name: 'docker', image: 'dtr.olly.dtcntr.net/admin/jenkins-slave:0.1', ttyEnabled: true, command: 'cat')],
-  volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')]
+podTemplate(label: 'docker', yaml: """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: jenkins-slave
+  labels:
+    name: jenkins-slave
+spec:
+  containers:
+  - name: docker
+    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.2
+    command: ["sleep"]
+    args: ["5000"]
+    volumeMounts:
+    - name: notary-user-key
+      readOnly: true
+      mountPath: "/home/jenkins/key/"
+    - name: docker-sock-volume
+      mountPath: "/var/run/docker.sock"
+    env:
+    - name: NOTARY_DELEGATION_PASSPHRASE
+      valueFrom:
+        secretKeyRef:
+          name: notary-passphrases
+          key: delegation-passphrase
+    - name: DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE
+      valueFrom:
+        secretKeyRef:
+          name: notary-passphrases
+          key: delegation-passphrase
+    - name: DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE
+      valueFrom:
+        secretKeyRef:
+          name: notary-passphrases
+          key: root-passphrase
+  volumes:
+  - name: notary-user-key
+    secret:
+      secretName: ucp-testing-key
+  - name: docker-sock-volume
+    hostPath:
+      path: /var/run/docker.sock
+"""
   ) {
       
   node('docker') {
@@ -29,19 +69,23 @@ podTemplate(label: 'docker',
           sh "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
           docker pull ${dtr_url}/${qa_repo}:${commit_id} && \
           docker tag ${dtr_url}/${qa_repo}:${commit_id} ${dtr_url}/${ga_repo}:${BUILD_ID}"
+        }
       }
-    }
       stage('Push Docker image') {
         git "${git_url}"
         container('docker') {
           sh "git rev-parse HEAD > .git/commit-id"
           def commit_id = readFile('.git/commit-id').trim()
           println commit_id
-
-          sh "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
+          
+          sh "notary -d ~/.docker/trust key import /home/jenkins/key/key.pem --role=targets/releases && \
+          notary -d ~/.docker/trust key list"
+          
+          sh "export DOCKER_CONTENT_TRUST=1 && \
+          docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
           docker push ${dtr_url}/${ga_repo}:${BUILD_ID}"
         }
       }
     }
   }
-}
+}      
