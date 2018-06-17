@@ -1,0 +1,37 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: secret-test-pod
+  namespace: jenkins
+  labels:
+    name: secret-test
+spec:
+  containers:
+  - name: ssh-test-container
+    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.1
+    command: ["sleep"]
+    args: ["5000"]
+    volumeMounts:
+    - name: notary-user-key
+      readOnly: true
+      mountPath: "/home/jenkins/"
+    - name: docker-sock-volume
+      mountPath: "/var/run/docker.sock"
+    env:
+    - name: NOTARY_DELEGATION_PASSPHRASE
+      valueFrom:
+        secretKeyRef:
+          name: notary-passphrases
+          key: delegation-passphrase
+    - name: DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE
+      valueFrom:
+        secretKeyRef:
+          name: notary-passphrases
+          key: delegation-passphrase
+  volumes:
+  - name: notary-user-key
+    secret:
+      secretName: ucp-testing-key
+  - name: docker-sock-volume
+    hostPath:
+      path: /var/run/docker.sock

@@ -78,11 +78,7 @@ spec:
           def commit_id = readFile('.git/commit-id').trim()
           println commit_id
           
-          sh "notary -d ~/.docker/trust key import /home/jenkins/key/key.pem --role=targets/releases && \
-          notary -d ~/.docker/trust key list"
-          
-          sh "export DOCKER_CONTENT_TRUST=1 && \
-          docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
+          sh "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
           docker push ${dtr_url}/${ga_repo}:${BUILD_ID}"
         }
       }
