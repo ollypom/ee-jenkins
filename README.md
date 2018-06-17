@@ -1,4 +1,5 @@
-# An Unofficial Guide to Configuring Jenkins for Docker Enterprise Edition
+# Configuring Jenkins for Docker Enterprise Edition
+*The unofficial Guide :D*
 
 This is a repository to configure a fully functioning Jenkins CICD environment running on top of Docker Enterprise Edition (Docker EE 2.0). There is a example documentation for both Swarm Mode and Kubernetes as the Orchestrator layer within Docker EE. This documentation assumes you have a fully functioning Universal Control Plane (UCP) and Docker Trusted Registry (DTR).
 
