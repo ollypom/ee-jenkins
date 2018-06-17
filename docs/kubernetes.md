@@ -81,4 +81,4 @@ Note I have also configured a jenkins URL field. This is required so that the sl
 
 At this point the Master is done. And is ready to configure some build pipelines. 
 
-As the pipelines are consistent with Swarm, they can be found here: [Pipelines](docs/pipelines.md)
+As the pipelines are consistent with Swarm, they can be found here: [Pipelines](pipelines.md)
