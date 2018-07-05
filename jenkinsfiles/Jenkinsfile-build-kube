@@ -4,9 +4,28 @@ def dtr_repo = 'dave/demo-app'
 
 def git_url = 'https://github.com/ollypom/ee-demo-app.git'
 
-podTemplate(label: 'docker',
-  containers: [containerTemplate(name: 'docker', image: 'dtr.olly.dtcntr.net/admin/jenkins-slave:0.1', ttyEnabled: true, command: 'cat')],
-  volumes: [hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock')]
+podTemplate(label: 'docker', yaml: """
+apiVersion: v1
+kind: Pod
+metadata:
+  name: jenkins-slave
+  namespace: jenkins
+  labels:
+    name: jenkins-slave
+spec:
+  containers:
+  - name: docker
+    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.2
+    command: ["sleep"]
+    args: ["5000"]
+    volumeMounts:
+    - name: docker-sock-volume
+      mountPath: "/var/run/docker.sock"
+  volumes:
+  - name: docker-sock-volume
+    hostPath:
+      path: /var/run/docker.sock
+"""
   ) {
       
   node('docker') {
