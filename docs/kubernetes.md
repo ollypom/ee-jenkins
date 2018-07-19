@@ -17,7 +17,7 @@ $ kubectl apply -f jenkins-ns.yaml
 
 Due to a limitation in Docker EE 2.0, we have to manually configure permissions for the Jenkins SA rather than using Kubernetes RBAC yaml. This should be changing soon. 
 
-Login to your UCP as an Administrator > User Management > Grants. Click New Grant in the top corner, and create a Full Control. Using the Jenkins Namespace as your Resource Set, Full Control as your Role, and the Jenkins-Servie-Account as your subject. 
+Login to your UCP as an Administrator > User Management > Grants. To mount the Docker Socket into a Slave container, we require some high privileges. Click New Grant in the top corner, select the Jenkins Service account, the Role Full Control and the Resource Set is All Namespaces.
 
 ![SA RBAC](/docs/images/sarbac.png?raw=true "SA RBAC")
 
