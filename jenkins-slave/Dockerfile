@@ -1,6 +1,6 @@
 
 FROM alpine:3.7
-MAINTAINER olly@docker.com
+LABEL MAINTAINER=olly@docker.com
 
 ARG UCPURL="https://ucp.olly.dtcntr.net:8443"
 ARG NTYURL="https://github.com/theupdateframework/notary/releases/download/v0.4.3/notary-Linux-amd64"
