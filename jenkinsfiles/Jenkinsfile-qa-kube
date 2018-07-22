@@ -12,12 +12,14 @@ metadata:
   name: jenkins-slave
   labels:
     name: jenkins-slave
+  annotations:
+   seccomp.security.alpha.kubernetes.io/pod: docker/default
 spec:
+  imagePullSecrets:
+    - name: dtrpass
   containers:
   - name: docker
-    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.2
-    command: ["sleep"]
-    args: ["5000"]
+    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.5
     volumeMounts:
     - name: notary-user-key
       readOnly: true
@@ -64,7 +66,6 @@ spec:
         container('docker') {
           sh "git rev-parse HEAD > .git/commit-id"
           def commit_id = readFile('.git/commit-id').trim()
-          println commit_id
 
           sh "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
           docker pull ${dtr_url}/${qa_repo}:${commit_id} && \
@@ -72,16 +73,12 @@ spec:
         }
       }
       stage('Push Docker image') {
-        git "${git_url}"
         container('docker') {
-          sh "git rev-parse HEAD > .git/commit-id"
           def commit_id = readFile('.git/commit-id').trim()
-          println commit_id
-          
           sh "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
           docker push ${dtr_url}/${ga_repo}:${BUILD_ID}"
         }
       }
     }
   }
-}      
+}   
