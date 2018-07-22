@@ -12,11 +12,15 @@ spec:
   metadata:
    labels:
     app: jenkins-master
+   annotations:
+    seccomp.security.alpha.kubernetes.io/pod: docker/default
   spec:
    serviceAccountName: jenkins-service-account
    containers:
    - name: master
-     image: 'jenkinsci/jenkins:lts-alpine'
+     image: 'jenkins/jenkins:2.121.2-alpine'
+     securityContext:
+       allowPrivilegeEscalation: false
      ports:
      - containerPort: 8080
      - containerPort: 50000
