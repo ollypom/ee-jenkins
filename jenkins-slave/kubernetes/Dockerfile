@@ -1,4 +1,3 @@
-
 FROM alpine:3.7
 LABEL MAINTAINER=olly@docker.com
 
@@ -24,8 +23,5 @@ RUN (wget -q --no-check-certificate ${UCPURL}/linux/docker &&\
 # Install notary
 RUN (wget -q -O /usr/local/bin/notary ${NTYURL} &&\
   chmod +x /usr/local/bin/notary)
-
-# Expose SSH
-EXPOSE 22
 
 CMD ["sh", "-c", "tail -f /dev/null"]

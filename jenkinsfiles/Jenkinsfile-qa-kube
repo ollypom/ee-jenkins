@@ -6,26 +6,25 @@ def ga_repo = 'prod/demo-app'
 def git_url = 'https://github.com/ollypom/ee-demo-app.git'
 
 podTemplate(label: 'docker', yaml: """
-apiVersion: v1
 kind: Pod
+apiVersion: v1
 metadata:
   name: jenkins-slave
+  namespace: jenkins
   labels:
     name: jenkins-slave
   annotations:
    seccomp.security.alpha.kubernetes.io/pod: docker/default
 spec:
-  imagePullSecrets:
-    - name: dtrpass
   containers:
-  - name: docker
+  - name: qarunner
     image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.5
     volumeMounts:
-    - name: notary-user-key
-      readOnly: true
-      mountPath: "/home/jenkins/key/"
     - name: docker-sock-volume
       mountPath: "/var/run/docker.sock"
+    - name: ucp-key
+      mountPath: "/tmp/jenkins"
+      readOnly: true
     env:
     - name: NOTARY_DELEGATION_PASSPHRASE
       valueFrom:
@@ -37,18 +36,13 @@ spec:
         secretKeyRef:
           name: notary-passphrases
           key: delegation-passphrase
-    - name: DOCKER_CONTENT_TRUST_ROOT_PASSPHRASE
-      valueFrom:
-        secretKeyRef:
-          name: notary-passphrases
-          key: root-passphrase
   volumes:
-  - name: notary-user-key
-    secret:
-      secretName: ucp-testing-key
   - name: docker-sock-volume
     hostPath:
       path: /var/run/docker.sock
+  - name: ucp-key
+    secret:
+      secretName: ucp-key
 """
   ) {
       
@@ -57,13 +51,13 @@ spec:
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
     ]){
       stage('Test Docker image') {
-        container('docker') {
+        container('qarunner') {
           sh "echo Hello World, Lets do some Testing...."
         }
       }
       stage('Retag Docker image') {
         git "${git_url}"
-        container('docker') {
+        container('qarunner') {
           sh "git rev-parse HEAD > .git/commit-id"
           def commit_id = readFile('.git/commit-id').trim()
 
@@ -73,9 +67,10 @@ spec:
         }
       }
       stage('Push Docker image') {
-        container('docker') {
-          def commit_id = readFile('.git/commit-id').trim()
-          sh "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
+        container('qarunner') {
+          sh "notary -d ~/.docker/trust key import /tmp/jenkins/key.pem"
+
+          sh "export DOCKER_CONTENT_TRUST=1 && \
           docker push ${dtr_url}/${ga_repo}:${BUILD_ID}"
         }
       }

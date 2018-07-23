@@ -5,18 +5,18 @@ metadata:
   namespace: jenkins
   labels:
     name: secret-test
+  annotations:
+   seccomp.security.alpha.kubernetes.io/pod: docker/default
 spec:
   containers:
-  - name: ssh-test-container
-    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.1
-    command: ["sleep"]
-    args: ["5000"]
+  - name: test-container
+    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.5
     volumeMounts:
-    - name: notary-user-key
-      readOnly: true
-      mountPath: "/home/jenkins/"
     - name: docker-sock-volume
       mountPath: "/var/run/docker.sock"
+    - name: ucp-key
+      mountPath: "/home/jenkins"
+      readOnly: true
     env:
     - name: NOTARY_DELEGATION_PASSPHRASE
       valueFrom:
@@ -29,9 +29,9 @@ spec:
           name: notary-passphrases
           key: delegation-passphrase
   volumes:
-  - name: notary-user-key
-    secret:
-      secretName: ucp-testing-key
   - name: docker-sock-volume
     hostPath:
       path: /var/run/docker.sock
+  - name: ucp-key
+    secret:
+      secretName: ucp-key
