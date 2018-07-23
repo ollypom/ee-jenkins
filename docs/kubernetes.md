@@ -106,7 +106,7 @@ Login to your UCP as an Administrator > User Management > Grants. To mount the D
 
 3) Create a KubeConfig file using this SA's token
 
-Grab the token from UCP:
+Grab the token (base64 encoded, needs to be decoded for Kubeconfig) from UCP:
 
 ```bash
 $ kubectl get secrets -n jenkins
@@ -114,7 +114,7 @@ NAME                                  TYPE                                  DATA
 default-token-rr6mj                   kubernetes.io/service-account-token   3         40d
 jenkins-service-account-token-4fhxl   kubernetes.io/service-account-token   3         40d
 
-$ kubectl -n jenkins get secrets -o json jenkins-service-account-token-4fhxl | jq -r '.data.token'
+$ kubectl -n jenkins get secrets -o json jenkins-service-account-token-4fhxl | jq -j '.data.token' | base64 -d
 <tokenisdisplayhere>
 ```
 
