@@ -1,6 +1,6 @@
-# jenkinsci/jenkins is official repo
+# jenkins/jenkins is official repo
 # jenkins:lts is debian based 800mb, jenkins:lts-alpine is 200mb.
-FROM jenkinsci/jenkins:lts-alpine
+FROM jenkins/jenkins:2.121.2-alpine
 LABEL maintainer=olly@docker.com
 ARG UCPURL="https://ucp.olly.dtcntr.net:8443"
 
