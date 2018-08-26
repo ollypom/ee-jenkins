@@ -18,7 +18,7 @@ spec:
    serviceAccountName: jenkins-service-account
    containers:
    - name: master
-     image: 'jenkins/jenkins:2.121.2-alpine'
+     image: 'jenkins/jenkins:2.121.3-alpine'
      securityContext:
        allowPrivilegeEscalation: false
      ports:
