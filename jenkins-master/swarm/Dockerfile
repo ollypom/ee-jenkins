@@ -1,7 +1,7 @@
 # jenkins/jenkins is official repo
 # jenkins:lts is debian based 800mb, jenkins:lts-alpine is 200mb.
-FROM jenkins/jenkins:2.121.2-alpine
-LABEL maintainer=olly@docker.com
+FROM jenkins/jenkins:2.138.3-alpine
+
 ARG UCPURL="https://ucp.olly.dtcntr.net:8443"
 
 # Embed UCP CA Certificate in Container Base Image and into Java

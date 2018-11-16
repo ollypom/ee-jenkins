@@ -2,22 +2,27 @@ version: "3.3"
 
 services:
   jenkins:
-      image: dtr.olly.dtcntr.net/admin/jenkins:2.88-alpine
-      deploy:
-          mode: replicated
-          replicas: 1
-          placement:
-              constraints:
-                  - 'node.platform.os == linux'
-      networks:
-          - default
-      ports:
-          - 30000:8080
-          - 50000:50000
-      volumes:
-          - jenkins:/var/jenkins_home
+    image: jenkins/jenkins:2.138.3-alpine
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - 'node.platform.os == linux'
+      labels:
+        com.docker.lb.hosts: "jenkins.az.olly.dtcntr.net"
+        com.docker.lb.network: jenkins
+        com.docker.lb.port: 8080
+    networks:
+        - jenkins
+    ports:
+        - 30000:8080
+        - 50000:50000
+    volumes:
+        - jenkins:/var/jenkins_home
 volumes:
-    jenkins:
+  jenkins:
 
 networks:
-    default:
+  jenkins:
+    external: true
