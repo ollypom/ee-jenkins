@@ -61,7 +61,9 @@ spec:
           def commit_id = readFile('commit-id').trim()
           println commit_id
 
-          sh "cd /repo && docker -D build -t ${dtr_url}/${dtr_repo}:${commit_id} ."
+          sh "cd /repo && \
+          export DOCKER_BUILDKIT=1 && \
+          docker -D build -t ${dtr_url}/${dtr_repo}:${commit_id} ."
         }
       }
       stage('Push Docker image') {
