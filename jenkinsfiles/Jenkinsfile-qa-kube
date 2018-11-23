@@ -5,7 +5,7 @@ def ga_repo = 'prod/demo-app'
 
 def git_url = 'https://github.com/ollypom/ee-demo-app.git'
 
-podTemplate(label: 'docker', yaml: """
+podTemplate(label: 'qadocker', yaml: """
 kind: Pod
 apiVersion: v1
 metadata:
@@ -26,11 +26,6 @@ spec:
       mountPath: "/tmp/jenkins"
       readOnly: true
     env:
-    - name: NOTARY_DELEGATION_PASSPHRASE
-      valueFrom:
-        secretKeyRef:
-          name: notary-passphrases
-          key: delegation-passphrase
     - name: DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE
       valueFrom:
         secretKeyRef:
@@ -42,11 +37,12 @@ spec:
       path: /var/run/docker.sock
   - name: ucp-key
     secret:
+      defaultMode: 256
       secretName: ucp-key
 """
   ) {
       
-  node('docker') {
+  node('qadocker') {
     withCredentials([
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
     ]){
@@ -68,7 +64,7 @@ spec:
       }
       stage('Push Docker image') {
         container('qarunner') {
-          sh "notary -d ~/.docker/trust key import /tmp/jenkins/key.pem"
+          sh "docker trust key load /tmp/jenkins/..data/key.pem"
 
           sh "export DOCKER_CONTENT_TRUST=1 && \
           docker push ${dtr_url}/${ga_repo}:${BUILD_ID}"

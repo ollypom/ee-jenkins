@@ -4,7 +4,7 @@ def dtr_repo = 'dave/demo-app'
 
 def git_url = 'https://github.com/ollypom/ee-demo-app.git'
 
-podTemplate(label: 'docker', yaml: """
+podTemplate(label: 'builddocker', yaml: """
 apiVersion: v1
 kind: Pod
 metadata:
@@ -51,7 +51,7 @@ spec:
 """
   ) {
 
-  node('docker') {
+  node('builddocker') {
     withCredentials([
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
     ]){
