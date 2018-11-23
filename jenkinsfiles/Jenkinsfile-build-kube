@@ -17,38 +17,59 @@ metadata:
 spec:
   imagePullSecrets:
     - name: dtrpass
+  initContainers:
+    # This container clones the desired git repo to the EmptyDir volume.
+    - name: git-clone
+      image: 'dtr.olly.dtcntr.net/admin/jq:1'
+      args:
+        - git
+        - clone
+        - --single-branch
+        - --
+        - https://github.com/ollypom/ee-demo-app
+        - /repo # Put it in the volume
+      securityContext:
+        readOnlyRootFilesystem: true
+      volumeMounts:
+        - name: git-repo
+          mountPath: /repo
   containers:
   - name: builder
-    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.5
+    image: 'dtr.olly.dtcntr.net/admin/jenkins-slave:0.7'
     volumeMounts:
     - name: docker-sock-volume
       mountPath: "/var/run/docker.sock"
+    - name: git-repo
+      mountPath: /repo
+    command: ["sh", "-c", "tail -f /dev/null"]
   volumes:
   - name: docker-sock-volume
     hostPath:
       path: /var/run/docker.sock
+  - name: git-repo
+    emptyDir: {}
 """
   ) {
-      
+
   node('docker') {
     withCredentials([
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
     ]){
       stage('Build Docker image') {
-        git "${git_url}"
         container('builder') {
-          sh "git rev-parse HEAD > .git/commit-id"
-          def commit_id = readFile('.git/commit-id').trim()
+          sh "cd /repo && git rev-parse HEAD > /home/jenkins/workspace/testing/commit-id"
+          def commit_id = readFile('commit-id').trim()
           println commit_id
 
-          sh "docker -D build -t ${dtr_url}/${dtr_repo}:${commit_id} ."
+          sh "cd /repo && docker -D build -t ${dtr_url}/${dtr_repo}:${commit_id} ."
         }
       }
       stage('Push Docker image') {
         container('builder') {
-          def commit_id = readFile('.git/commit-id').trim()
+          def commit_id = readFile('commit-id').trim()
           sh "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url} && \
-          docker push ${dtr_url}/${dtr_repo}:${commit_id}"
+          docker push ${dtr_url}/${dtr_repo}:${commit_id} && \
+          docker rmi ${dtr_url}/${dtr_repo}:${commit_id}"
         }
       }
     }
