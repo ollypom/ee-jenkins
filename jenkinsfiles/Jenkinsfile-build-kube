@@ -21,6 +21,7 @@ spec:
     # This container clones the desired git repo to the EmptyDir volume.
     - name: git-clone
       image: 'dtr.olly.dtcntr.net/admin/jq:1'
+      imagePullPolicy: Always
       args:
         - git
         - clone
@@ -35,7 +36,8 @@ spec:
           mountPath: /repo
   containers:
   - name: builder
-    image: 'dtr.olly.dtcntr.net/admin/jenkins-slave:0.7'
+    image: 'dtr.olly.dtcntr.net/admin/jenkins-slave:0.8'
+    imagePullPolicy: Always
     volumeMounts:
     - name: docker-sock-volume
       mountPath: "/var/run/docker.sock"

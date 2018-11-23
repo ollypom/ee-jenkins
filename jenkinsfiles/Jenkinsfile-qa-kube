@@ -16,9 +16,12 @@ metadata:
   annotations:
    seccomp.security.alpha.kubernetes.io/pod: docker/default
 spec:
+  imagePullSecrets:
+    - name: dtrpass
   containers:
   - name: qarunner
-    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.7
+    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.8
+    imagePullPolicy: Always
     volumeMounts:
     - name: docker-sock-volume
       mountPath: "/var/run/docker.sock"
