@@ -57,7 +57,7 @@ spec:
     ]){
       stage('Build Docker image') {
         container('builder') {
-          sh "cd /repo && git rev-parse HEAD > /home/jenkins/workspace/testing/commit-id"
+          sh "cd /repo && git rev-parse HEAD > /home/jenkins/workspace/ee-build/commit-id"
           def commit_id = readFile('commit-id').trim()
           println commit_id
 
