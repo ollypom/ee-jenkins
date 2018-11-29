@@ -20,7 +20,7 @@ spec:
     - name: dtrpass
   containers:
   - name: qarunner
-    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.8
+    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.9
     imagePullPolicy: Always
     volumeMounts:
     - name: docker-sock-volume

@@ -36,7 +36,7 @@ spec:
           mountPath: /repo
   containers:
   - name: builder
-    image: 'dtr.olly.dtcntr.net/admin/jenkins-slave:0.8'
+    image: 'dtr.olly.dtcntr.net/admin/jenkins-slave:0.9'
     imagePullPolicy: Always
     volumeMounts:
     - name: docker-sock-volume
