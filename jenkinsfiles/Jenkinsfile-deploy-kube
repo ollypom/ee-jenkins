@@ -1,0 +1,51 @@
+def dtr_url = 'dtr.olly.dtcntr.net'
+def ga_repo = 'prod/demo-app'
+def buildNumber = Jenkins.instance.getItem('ee-testing').lastSuccessfulBuild.number
+def depname = 'dockercondemo'
+def depcont = 'dockercondemo-container'
+
+podTemplate(label: 'deploydocker', yaml: """
+kind: Pod
+apiVersion: v1
+metadata:
+  name: jenkins-slave
+  namespace: jenkins
+  labels:
+    name: jenkins-slave
+  annotations:
+   seccomp.security.alpha.kubernetes.io/pod: docker/default
+spec:
+  serviceAccountName: jenkins-service-account
+  imagePullSecrets:
+    - name: dtrpass
+  containers:
+  - name: deployrunner
+    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.9
+    imagePullPolicy: Always
+"""
+  ) {
+
+  node('deploydocker') {
+    withCredentials([
+        [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
+    ]){
+      stage('Deploy Docker image') {
+        container('deployrunner') {
+          sh """
+          cd /run/secrets/kubernetes.io/serviceaccount && \
+          kubectl config set-cluster demo --server='https://kubernetes.default' --certificate-authority=ca.crt && \
+          kubectl config set-context demo && \
+          kubectl config set-credentials user --token=\$(cat token) && \
+          kubectl config set-context demo --user=user && \
+          kubectl config use-context demo
+          """
+          
+          sh """
+          kubectl -n default set image deployment.v1.apps/${depname} ${depcont}=${dtr_url}/${ga_repo}:${buildNumber} --record
+          """
+        }
+      }
+    }
+  }
+}
+

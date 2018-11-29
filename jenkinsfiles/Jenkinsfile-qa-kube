@@ -51,7 +51,10 @@ spec:
     ]){
       stage('Test Docker image') {
         container('qarunner') {
-          sh "echo Hello World, Lets do some Testing...."
+          sh """
+          sleep 30 && \
+          echo Hello World, Lets do some Testing...."
+          """
         }
       }
       stage('Retag Docker image') {
