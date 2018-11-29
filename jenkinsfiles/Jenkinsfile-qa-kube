@@ -53,7 +53,7 @@ spec:
         container('qarunner') {
           sh """
           sleep 30 && \
-          echo Hello World, Lets do some Testing...."
+          echo Hello World, Lets do some Testing....
           """
         }
       }
