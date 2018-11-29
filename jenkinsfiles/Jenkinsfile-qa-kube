@@ -46,9 +46,6 @@ spec:
   ) {
       
   node('qadocker') {
-    withCredentials([
-        [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
-    ]){
       stage('Test Docker image') {
         container('qarunner') {
           sh """
@@ -57,6 +54,16 @@ spec:
           """
         }
       }
+  }
+
+  stage('Deploy approval'){
+    input "Deploy to prod?"
+  }
+
+  node('qadocker') {
+    withCredentials([
+        [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
+    ]){
       stage('Retag Docker image') {
         git "${git_url}"
         container('qarunner') {

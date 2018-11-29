@@ -26,9 +26,6 @@ spec:
   ) {
 
   node('deploydocker') {
-    withCredentials([
-        [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
-    ]){
       stage('Deploy Docker image') {
         container('deployrunner') {
           sh """
@@ -43,7 +40,6 @@ spec:
           sh """
           kubectl -n default set image deployment.v1.apps/${depname} ${depcont}=${dtr_url}/${ga_repo}:${buildNumber} --record
           """
-        }
       }
     }
   }
