@@ -18,6 +18,7 @@ metadata:
 spec:
   imagePullSecrets:
     - name: dtrpass
+  serviceAccountName: jenkins-service-account    
   containers:
   - name: qarunner
     image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.9
@@ -44,16 +45,49 @@ spec:
       secretName: ucp-key
 """
   ) {
-      
+
   node('qadocker') {
+    withCredentials([
+        [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
+    ]){
       stage('Test Docker image') {
+        git "${git_url}"
         container('qarunner') {
+          sh "git rev-parse HEAD > .git/commit-id"
+          def commit_id = readFile('.git/commit-id').trim()
+          
           sh """
-          sleep 30 && \
-          echo Hello World, Lets do some Testing....
+          cd /run/secrets/kubernetes.io/serviceaccount && \
+          kubectl config set-cluster demo --server='https://kubernetes.default' --certificate-authority=ca.crt && \
+          kubectl config set-context demo && \
+          kubectl config set-credentials user --token=\$(cat token) && \
+          kubectl config set-context demo --user=user && \
+          kubectl config use-context demo
+          
+          cat <<EOF | kubectl apply -f -
+kind: Pod
+apiVersion: v1
+metadata:
+  name: qa-container-demo-${BUILD_ID}
+spec:
+  imagePullSecrets:
+    - name: dtrpass
+  containers:
+    - name: qa-container-demo-app
+      image: ${dtr_url}/${qa_repo}:${commit_id}
+      ports:
+        - containerPort: 80
+    - name: qa-container
+      image: ${dtr_url}/admin/jq:1
+      command: ["sh", "-c", "tail -f /dev/null"]
+EOF
+          sleep 20
+          kubectl exec qa-container-demo-${BUILD_ID} --container qa-container -- curl localhost
+          kubectl delete pod qa-container-demo-${BUILD_ID}
           """
         }
       }
+    }
   }
 
   stage('Deploy approval'){
@@ -85,4 +119,4 @@ spec:
       }
     }
   }
-}   
+}
