@@ -2,7 +2,7 @@ version: "3.3"
 
 services:
   jenkins:
-    image: jenkins/jenkins:2.138.3-alpine
+    image: jenkins/jenkins:2.168-alpine
     deploy:
       mode: replicated
       replicas: 1
