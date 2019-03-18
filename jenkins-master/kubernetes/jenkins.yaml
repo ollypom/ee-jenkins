@@ -4,6 +4,7 @@ metadata:
  name: jenkins-master
  namespace: jenkins
 spec:
+ revisionHistoryLimit: 2
  replicas: 1
  selector:
   matchLabels:
@@ -18,7 +19,7 @@ spec:
    serviceAccountName: jenkins-service-account
    containers:
    - name: master
-     image: 'jenkins/jenkins:2.138.2-alpine'
+     image: 'jenkins/jenkins:2.168-alpine'
      securityContext:
        allowPrivilegeEscalation: false
      ports:
