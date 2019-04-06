@@ -9,3 +9,18 @@ kind: ServiceAccount
 metadata:
   name: jenkins-service-account
   namespace: jenkins
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: jenkins
+spec:
+  limits:
+  - default:
+      cpu: 1
+      memory: 512Mi
+    defaultRequest:
+      cpu: 0.5
+      memory: 512Mi
+    type: Container
