@@ -5,7 +5,7 @@ def ga_repo = 'prod/demo-app'
 
 def git_url = 'https://github.com/ollypom/ee-demo-app.git'
 
-podTemplate(label: 'docker', yaml: """
+podTemplate(label: 'qadocker', yaml: """
 kind: Pod
 apiVersion: v1
 metadata:
@@ -16,9 +16,13 @@ metadata:
   annotations:
    seccomp.security.alpha.kubernetes.io/pod: docker/default
 spec:
+  imagePullSecrets:
+    - name: dtrpass
+  serviceAccountName: jenkins-service-account    
   containers:
   - name: qarunner
-    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.5
+    image: dtr.olly.dtcntr.net/admin/jenkins-slave:0.9
+    imagePullPolicy: Always
     volumeMounts:
     - name: docker-sock-volume
       mountPath: "/var/run/docker.sock"
@@ -26,11 +30,6 @@ spec:
       mountPath: "/tmp/jenkins"
       readOnly: true
     env:
-    - name: NOTARY_DELEGATION_PASSPHRASE
-      valueFrom:
-        secretKeyRef:
-          name: notary-passphrases
-          key: delegation-passphrase
     - name: DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE
       valueFrom:
         secretKeyRef:
@@ -42,19 +41,63 @@ spec:
       path: /var/run/docker.sock
   - name: ucp-key
     secret:
+      defaultMode: 256
       secretName: ucp-key
 """
   ) {
-      
-  node('docker') {
+
+  node('qadocker') {
     withCredentials([
         [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
     ]){
       stage('Test Docker image') {
+        git "${git_url}"
         container('qarunner') {
-          sh "echo Hello World, Lets do some Testing...."
+          sh "git rev-parse HEAD > .git/commit-id"
+          def commit_id = readFile('.git/commit-id').trim()
+          
+          sh """
+          cd /run/secrets/kubernetes.io/serviceaccount && \
+          kubectl config set-cluster demo --server='https://kubernetes.default' --certificate-authority=ca.crt && \
+          kubectl config set-context demo && \
+          kubectl config set-credentials user --token=\$(cat token) && \
+          kubectl config set-context demo --user=user && \
+          kubectl config use-context demo
+          
+          cat <<EOF | kubectl apply -f -
+kind: Pod
+apiVersion: v1
+metadata:
+  name: qa-container-demo-${BUILD_ID}
+spec:
+  imagePullSecrets:
+    - name: dtrpass
+  containers:
+    - name: qa-container-demo-app
+      image: ${dtr_url}/${qa_repo}:${commit_id}
+      ports:
+        - containerPort: 80
+    - name: qa-container
+      image: ${dtr_url}/admin/jq:1
+      command: ["sh", "-c", "tail -f /dev/null"]
+EOF
+          sleep 20
+          kubectl exec qa-container-demo-${BUILD_ID} --container qa-container -- curl localhost
+          kubectl delete pod qa-container-demo-${BUILD_ID}
+          """
         }
       }
+    }
+  }
+
+  stage('Deploy approval'){
+    input "Deploy to prod?"
+  }
+
+  node('qadocker') {
+    withCredentials([
+        [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD']
+    ]){
       stage('Retag Docker image') {
         git "${git_url}"
         container('qarunner') {
@@ -68,7 +111,7 @@ spec:
       }
       stage('Push Docker image') {
         container('qarunner') {
-          sh "notary -d ~/.docker/trust key import /tmp/jenkins/key.pem"
+          sh "docker trust key load /tmp/jenkins/..data/key.pem"
 
           sh "export DOCKER_CONTENT_TRUST=1 && \
           docker push ${dtr_url}/${ga_repo}:${BUILD_ID}"
@@ -76,4 +119,4 @@ spec:
       }
     }
   }
-}   
+}
