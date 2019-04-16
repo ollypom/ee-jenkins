@@ -1,4 +1,4 @@
-def dtr_creds = '341ab591-1432-44e7-a28c-44bf7fb3871e'
+def dtr_creds = 'dtrcreds'
 def dtr_url = 'dtr.olly.dtcntr.net'
 def dtr_repo = 'dave/demo-app'
 
