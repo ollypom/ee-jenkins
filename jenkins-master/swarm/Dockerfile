@@ -1,6 +1,6 @@
 # jenkins/jenkins is official repo
 # jenkins:lts is debian based 800mb, jenkins:lts-alpine is 200mb.
-FROM jenkins/jenkins:2.138.3-alpine
+FROM jenkins/jenkins:2.164.2-alpine
 
 ARG UCPURL="https://ucp.olly.dtcntr.net:8443"
 

@@ -39,7 +39,7 @@ RUN $env:PATH = $env:DOCKER_PATH + ';' + $env:PATH; `
 
 ## Runtime
 
-FROM dtr.az.olly.dtcntr.net/admin/openjdk:latest
+FROM dtr.olly.dtcntr.net/admin/openjdk:ltsc2019
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
 ARG VERSION="3.27"
