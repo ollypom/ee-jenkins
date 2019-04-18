@@ -1,5 +1,5 @@
 #escape=`
-FROM mcr.microsoft.com/windows/servercore:1803
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 ARG DOCKER_PATH="C:\Program Files\docker"

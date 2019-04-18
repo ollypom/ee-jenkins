@@ -2,7 +2,7 @@
 
 ## Git
 
-FROM mcr.microsoft.com/windows/servercore:1803 AS gitinstaller
+FROM mcr.microsoft.com/windows/servercore:ltsc2019 AS gitinstaller
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
 ARG GIT_VERSION="2.17.1"
@@ -18,7 +18,7 @@ RUN if ((Get-FileHash git.zip -Algorithm sha256).Hash -ne $env:GIT_DOWNLOAD_SHA2
 
 ## Docker
 
-FROM mcr.microsoft.com/windows/servercore:1803 AS dockercli
+FROM mcr.microsoft.com/windows/servercore:ltsc2019 AS dockercli
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';"]
 
 ARG DOCKER_PATH="C:\Program Files\docker"
