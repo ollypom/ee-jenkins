@@ -1,0 +1,22 @@
+def dtr_creds = 'dtr_creds'
+def dtr_url = 'dtr.olly.dtcntr.net'
+def dtr_repo = 'admin/windows-demo-app'
+
+def git_url = 'https://github.com/ollypom/ee-demo-app-windows'
+
+node("winagent") {
+    withCredentials([
+        [$class: 'UsernamePasswordMultiBinding', credentialsId: dtr_creds, usernameVariable: 'DTR_USR', passwordVariable: 'DTR_PWD'],
+    ]){
+        git url: "${git_url}"
+          
+        def commit_id = powershell (returnStdout: true, script: 'git rev-parse HEAD').trim()
+        println commit_id
+         
+        stage "build"
+        powershell "docker build -t ${dtr_url}/${dtr_repo}:${commit_id} ."
+
+        stage "publish"
+        powershell "docker login -u ${DTR_USR} -p ${DTR_PWD} ${dtr_url}; docker push ${dtr_url}/${dtr_repo}:${commit_id}"
+    }
+}
