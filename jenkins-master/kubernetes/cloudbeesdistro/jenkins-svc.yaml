@@ -1,0 +1,33 @@
+# Services
+kind: Service
+apiVersion: v1
+metadata:
+    name: cloudbees-jenkins-master
+    namespace: jenkins
+spec:
+    selector:
+        app: cloudbees-jenkins-master
+    ports:
+        - port: 50000
+          protocol: TCP
+          targetPort: 50000
+          name: slaves
+        - port: 80
+          protocol: TCP
+          targetPort: 8080
+          name: ui
+---
+# Create the ingress resource
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: cloudbees-jenkins-ui
+  namespace: jenkins
+spec:
+  rules:
+  - host: cloudbees-jenkins.apps.olly.dtcntr.net
+    http:
+      paths:
+      - backend:
+          serviceName: cloudbees-jenkins-master
+          servicePort: 80

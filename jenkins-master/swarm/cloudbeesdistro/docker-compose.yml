@@ -1,0 +1,27 @@
+version: "3.3"
+
+services:
+  jenkins:
+    image: 'cloudbees/cloudbees-jenkins-distribution:2.164.2.1'
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - 'node.platform.os == linux'
+      labels:
+        com.docker.lb.hosts: "cloudbees-jenkins.az.olly.dtcntr.net"
+        com.docker.lb.network: cloudbees_jenkins
+        com.docker.lb.port: 8080
+    networks:
+        - jenkins
+    ports:
+        - 50000:50000
+    volumes:
+        - jenkins:/var/jenkins_home
+volumes:
+  jenkins:
+
+networks:
+  jenkins:
+    driver: overlay

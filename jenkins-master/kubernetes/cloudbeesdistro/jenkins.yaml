@@ -1,0 +1,52 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+ name: cloudbees-jenkins-master
+ namespace: jenkins
+spec:
+ revisionHistoryLimit: 2
+ replicas: 1
+ selector:
+  matchLabels:
+    app: cloudbees-jenkins-master
+ template:
+  metadata:
+   labels:
+    app: cloudbees-jenkins-master
+   annotations:
+    seccomp.security.alpha.kubernetes.io/pod: docker/default
+  spec:
+   serviceAccountName: jenkins-service-account
+   containers:
+   - name: master
+     image: 'cloudbees/cloudbees-jenkins-distribution:2.164.2.1'
+     securityContext:
+       allowPrivilegeEscalation: false
+     ports:
+     - containerPort: 8080
+     - containerPort: 50000
+     readinessProbe:
+      httpGet:
+       path: /login
+       port: 8080
+      periodSeconds: 10
+      timeoutSeconds: 5
+      successThreshold: 2
+      failureThreshold: 5
+     volumeMounts:
+     - mountPath: /var/jenkins_home
+       name: jenkins-home
+     resources:
+      limits:
+       cpu: 1
+       memory: 3000Mi
+      requests:
+       cpu: 1
+       memory: 3000Mi
+     env: 
+     - name: JAVA_OPTS
+       value: '-Dhudson.TcpSlaveAgentListener.hostName=cloudbees-jenkins-master -Dhudson.TcpSlaveAgentListener.port=50000'
+   volumes:
+   - name: jenkins-home
+     persistentVolumeClaim:
+      claimName: cloudbees-jenkins
