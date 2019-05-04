@@ -137,14 +137,29 @@ $ kubectl create ns jenkins
 $ kubectl create sa jenkins-service account -n jenkins
 ```
 
-2) Give the relevant Grants to this service account.
+2) Give the relevant permissions to this this service account.
 
-Login to your UCP as an Administrator > User Management > Grants. To mount the
-Docker Socket into a Slave container, we require some high privileges. Click
-New Grant in the top corner, select the Jenkins Service account, the Role Full
-Control and the Resource Set is All Namespaces.
+*The Bad News is that because we are mounting the Docker Socket into slaves to
+do Docker Builds, the Service Acccount will need Cluster Admin rights on our
+Cluster. Hopefully when rootless builders come around, we can remove these
+permissions from a service account*. 
 
-![SA RBAC](/docs/images/sarbac.png?raw=true "SA RBAC")
+```bash
+$ cat <<EOF | kubectl create -f -
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins-sa:cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: jenkins-service-account
+  namespace: jenkins
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+EOF
+```
 
 3) Create a KubeConfig file using this SA's token
 
