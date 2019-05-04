@@ -10,6 +10,19 @@ metadata:
   name: jenkins-service-account
   namespace: jenkins
 ---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins-sa:cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: jenkins-service-account
+  namespace: jenkins
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+---
 apiVersion: v1
 kind: LimitRange
 metadata:
