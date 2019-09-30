@@ -79,8 +79,8 @@ spec:
       stage('Use Anchore') {
         container('builder') {
           def commit_id = readFile('commit-id').trim()
-          sh "cp /repo/Dockerfile /home/jenkins/workspace/ee-build/Dockerfile && \
-          echo '${dtr_url}/${dtr_repo}:${commit_id} Dockerfile' > /home/jenkins/workspace/ee-build/anchore-images"
+          sh "cp /repo/Dockerfile /home/jenkins/agent/workspace/ee-build/Dockerfile && \
+          echo '${dtr_url}/${dtr_repo}:${commit_id} Dockerfile' > /home/jenkins/agent/workspace/ee-build/anchore-images"
           anchore name: 'anchore-images', engineurl: 'http://anchore-engine.anchore', engineCredentialsId: 'anchore', annotations: [[key: 'added-by', value: 'jenkins']]
         }
       } 
