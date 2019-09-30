@@ -1,4 +1,4 @@
-FROM microsoft/windowsservercore:ltsc2019
+FROM mcr.microsoft.com/windows/servercore:ltsc2019
 
 # $ProgressPreference: https://github.com/PowerShell/PowerShell/issues/2138#issuecomment-251261324
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
@@ -35,8 +35,8 @@ RUN $url = ('https://github.com/ojdkbuild/ojdkbuild/releases/download/{0}/{1}' -
 	; \
 	\
 	Write-Host 'Verifying install ...'; \
-	Write-Host '  java --version'; java --version; \
-	Write-Host '  javac --version'; javac --version; \
+	Write-Host '  java -version'; java -version; \
+	Write-Host '  javac -version'; javac -version; \
 	\
 	Write-Host 'Removing ...'; \
 	Remove-Item ojdkbuild.zip -Force; \

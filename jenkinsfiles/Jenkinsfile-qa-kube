@@ -82,7 +82,7 @@ spec:
       command: ["sh", "-c", "tail -f /dev/null"]
 EOF
           sleep 20
-          kubectl exec qa-container-demo-${BUILD_ID} --container qa-container -- curl localhost
+          kubectl exec qa-container-demo-${BUILD_ID} --container qa-container -- curl localhost:8080
           kubectl delete pod qa-container-demo-${BUILD_ID}
           """
         }

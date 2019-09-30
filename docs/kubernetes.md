@@ -1,33 +1,51 @@
 # Jenkins Guide for Docker EE - Kubernetes
 
-> Note if you are self hosting Jenkins outside of a Docker EE Pod see the last section "Configure a Self Hosted Jenkins' Cloud Provider".
+> Note if you are self hosting Jenkins outside of a Docker EE Pod see the last
+> section "Configure a Self Hosted Jenkins' Cloud Provider".
 
 ## Deploy your Master
 
-Fortunatley for Kubernetes, as a service account is mounted into every pod containing the relevant certificates to communicate with the API server. We do not need to Build a custom Docker Image, and can use the one straight from UpStream! Yay!
+Fortunatley for Kubernetes, as a service account is mounted into every pod
+containing the relevant certificates to communicate with the API server. We do
+not need to Build a custom Docker Image, and can use the one straight from
+UpStream! Yay!
 
 **Deploy a Namespace and a SA**
 
-Firstly we will create a kubernetes namespace for Jenkins, and also create a Service account. 
+Firstly we will create a kubernetes namespace for Jenkins, and also create a
+Service account. 
 
 ```
 $ cd jenkins-master/kubernetes
 $ kubectl apply -f jenkins-ns.yaml
 ```
 
-**Configure RBAC for your Service Account**
+Inside of the `jenkins-ns.yaml` file we are configuring a few things:
 
-Due to a limitation in Docker EE 2.0, we have to manually configure permissions for the Jenkins SA rather than using Kubernetes RBAC yaml. This should be changing soon. 
+1) Creating a Kubernetes Namespace to house the master and all dynamic slaves 
 
-Login to your UCP as an Administrator > User Management > Grants. To mount the Docker Socket into a Slave container, we require some high privileges. Click New Grant in the top corner, select the Jenkins Service account, the Role Full Control and the Resource Set is All Namespaces.
+2) Creating a Kubernetes Service Account, this will be mounted into the Master
+and will talk the Kubernetes API to provision slaves for us. 
 
-![SA RBAC](/docs/images/sarbac.png?raw=true "SA RBAC")
+3) Create a Kubernetes RBAC role to allow the Service account the relevant
+persmissions to provision pods. *The Bad News is that because we are mounting
+the Docker Socket into slaves to do Docker Builds, the Service Acccount will
+need Cluster Admin rights on our Cluster. Hopefully when rootless builders come
+around, we can remove these permissions from a service account*. 
+
+4) Apply default limits to all kubernetes pods created in the Jenkins namespace,
+just in case an operator forgets to set memory / CPU limits for their slaves, we
+will apply a sane default. 
 
 **Persistent Storage (Optional)**
 
-As part of my Jenkins deployment I plan to use an NFS volume to sit behind my Jenkins master. This will provide my master an element of persistence if it has to migrate around nodes in my cluster, or as I upgrade the pod over time.
+As part of my Jenkins deployment I plan to use an NFS volume to sit behind my
+Jenkins master. This will provide my master an element of persistence if it has
+to migrate around nodes in my cluster, or as I upgrade the pod over time.
 
-In the example .yaml I have defined a 5Gi volume for use for Jenkins, and have created the relevant Physical Volume (PV) and Physical Volume Claim (PVC) within Kubernetes. You would need to adjust this yaml for your NFS server.
+In the example .yaml I have defined a 5Gi volume for use for Jenkins, and have
+created the relevant Physical Volume (PV) and Physical Volume Claim (PVC)
+within Kubernetes. You would need to adjust this yaml for your NFS server.
 
 ```
 $ cd jenkins-master/kubernetes
@@ -36,9 +54,15 @@ $ kubectl apply -f jenkins-pv.yaml
 
 **Deploy the Master**
 
-Now deploy the Jenkins Master. For my instance, I will deploy this as a Kubernetes Deployment of 1 Replica, I will apply resource contraints and mount my NFS Volume. This .yaml made need to be customized for your environment. 
+Now deploy the Jenkins Master. For my instance, I will deploy this as a
+Kubernetes Deployment of 1 Replica, I will apply resource contraints and mount
+my NFS Volume. This .yaml made need to be customized for your environment. 
 
-Also within this yaml, I will deploy a kubernetes service, exposing the master on ports 80 (For the web UI) and port 5000 (for slave communication back to the master). To access the UI I have not defined a NodePort or a Loadbalancer. Instead I plan to user a Kubernetes Ingress Controller, this has already been deployed on the cluster and is an Optional next step. 
+Also within this yaml, I will deploy a kubernetes service, exposing the master
+on ports 80 (For the web UI) and port 5000 (for slave communication back to the
+master). To access the UI I have not defined a NodePort or a Loadbalancer.
+Instead I plan to user a Kubernetes Ingress Controller, this has already been
+deployed on the cluster and is an Optional next step. 
 
 ```
 $ cd jenkins-master/kubernetes
@@ -47,7 +71,8 @@ $ kubectl apply -f jenkins.yaml
 
 ## Configure Your Master
 
-Browse to the Jenkins Master in Chrome, you will need to retrieve the default log in password from the Jenkins Master logs.
+Browse to the Jenkins Master in Chrome, you will need to retrieve the default
+log in password from the Jenkins Master logs.
 
 ```
 $ kubectl -n jenkins logs jenkins-master-7c898bd487-xhcbc
@@ -65,7 +90,8 @@ Manage Jenkins > Manage Plugins > Available. Search for Kubernetes.
 
 Now we can go into the System and Configure the plugin. 
 
-Firstly we will configure the Kubernetes SA credentials within Jenkins. This give us a user to communicate with the Kubernetes API Server.
+Firstly we will configure the Kubernetes SA credentials within Jenkins. This
+give us a user to communicate with the Kubernetes API Server.
 
 Credentials > System > Global Credentials > Add Credentials
 
@@ -75,34 +101,65 @@ Next we can Add a new cloud into Jenkins.
 
 Manage Jenkins > Configure System. Scroll down to Cloud. 
 
-There isn't many fields we will need to configure here. Firstly name your cloud, for the URL I will use the Kubernetes API Server's internal IP which by default is 10.96.0.1. For Credentials I will select "Secret Text", which should refer to our Service Account Credential we configured previously. If you click test connection, it should all work :) 
+There isn't many fields we will need to configure here. Firstly name your
+cloud, for the URL I will use the Kubernetes API Server's internal IP which by
+default is 10.96.0.1. For Credentials I will select "Secret Text", which should
+refer to our Service Account Credential we configured previously. If you click
+test connection, it should all work :) 
 
-Note I have also configured a jenkins URL field. This is required so that the slaves, use the internal kubernetes DNS service to route back to our master. The field "jenkins-master" refers to our kubernetes service name. 
+Note I have also configured a jenkins URL field. This is required so that the
+slaves, use the internal kubernetes DNS service to route back to our master.
+The field "jenkins-master" refers to our kubernetes service name. 
 
 ![Kube Cloud](/docs/images/newkubecloud.png?raw=true "Kube Cloud")
 
-At this point the Master is done. And is ready to configure some build pipelines. 
+At this point the Master is done. And is ready to configure some build
+pipelines. 
 
-As the pipelines are consistent with Swarm, they can be found here: [Pipelines](pipelines.md)
+As the pipelines are consistent with Swarm, they can be found here:
+[Pipelines](pipelines.md)
 
 ## Configure a Self Hosted Jenkins' Cloud Provider
 
-This assumes you have got a Jenkins master and the relevant plugins installed somewhere. If not start from the top to deploy this in containers :D 
+This assumes you have got a Jenkins master and the relevant plugins installed
+somewhere. If not start from the top to deploy this in containers :D 
 
-As Docker EE uses EC Signed tokens, today we can not use a UCP user to authenticate Jenkins until they update their [Kubernetes Client](https://github.com/jenkinsci/kubernetes-cd-plugin/issues/56). Instead we must use a service account. So here are the steps to get this to work:
+As Docker EE uses EC Signed tokens, today we can not use a UCP user to
+authenticate Jenkins until they update their [Kubernetes
+Client](https://github.com/jenkinsci/kubernetes-cd-plugin/issues/56). Instead
+we must use a service account. So here are the steps to get this to work:
 
-1) Create a Jenkins service account in whichever namespace will host your slaves.
+1) Create a Jenkins service account in whichever namespace will host your
+slaves.
 
 ```
 $ kubectl create ns jenkins
 $ kubectl create sa jenkins-service account -n jenkins
 ```
 
-2) Give the relevant Grants to this service account.
+2) Give the relevant permissions to this this service account.
 
-Login to your UCP as an Administrator > User Management > Grants. To mount the Docker Socket into a Slave container, we require some high privileges. Click New Grant in the top corner, select the Jenkins Service account, the Role Full Control and the Resource Set is All Namespaces.
+*The Bad News is that because we are mounting the Docker Socket into slaves to
+do Docker Builds, the Service Acccount will need Cluster Admin rights on our
+Cluster. Hopefully when rootless builders come around, we can remove these
+permissions from a service account*. 
 
-![SA RBAC](/docs/images/sarbac.png?raw=true "SA RBAC")
+```bash
+$ cat <<EOF | kubectl create -f -
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins-sa:cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: jenkins-service-account
+  namespace: jenkins
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+EOF
+```
 
 3) Create a KubeConfig file using this SA's token
 
@@ -177,20 +234,26 @@ worker1.local       Ready     <none>    40d       v1.8.11-docker-8d637ae
 
 4) Upload the File into Jenkins Credentials 
 
-Login to Jenkins. Go to Credentials > System > Global Credentials > Add Credentials. Select Kind Secret File, upload your kubeconfig and give it an ID.
+Login to Jenkins. Go to Credentials > System > Global Credentials > Add
+Credentials. Select Kind Secret File, upload your kubeconfig and give it an ID.
 
 ![Upload KubeConfig](/docs/images/uploadkubeconfig.png?raw=true "SA RBAC")
 
 5) Configure Kubernetes Plugin
 
-Login to Jenkins. Go to Manage Jenkins > Configure System. Scroll to the bottom and find Cloud > Add New Cloud > Kubernetes.
+Login to Jenkins. Go to Manage Jenkins > Configure System. Scroll to the bottom
+and find Cloud > Add New Cloud > Kubernetes.
 
-Add in your Kubernetes URL and select the kubeconfig we have just uploaded. Then hit the Test connection and hopefully everything should work out. 
+Add in your Kubernetes URL and select the kubeconfig we have just uploaded.
+Then hit the Test connection and hopefully everything should work out. 
 
 ![Add New Cloud](/docs/images/selfhostedcloudconfig.png?raw=true "SA RBAC")
 
-Finally I added my Jenkins URL in here too, so your slaves can find your master. Then click save :)
+Finally I added my Jenkins URL in here too, so your slaves can find your
+master. Then click save :)
 
-6) At this point the Master is done. And is ready to configure some build pipelines. 
+6) At this point the Master is done. And is ready to configure some build
+pipelines. 
 
-As the pipelines are consistent with Swarm, they can be found here: [Pipelines](pipelines.md)
+As the pipelines are consistent with Swarm, they can be found here:
+[Pipelines](pipelines.md)
