@@ -25,7 +25,7 @@ metadata:
   namespace: jenkins
 spec:
   rules:
-  - host: jenkins.apps.olly.dtcntr.net
+  - host: jenkins.apps.az.olly.dtcntr.net
     http:
       paths:
       - backend:
